@@ -20,6 +20,8 @@ let scatterLaser = false; // Skill: Scatter Laser
 let shieldActive = false; // Skill: Shield
 
 let isTouching = false; // To track if the user is currently touching
+let touchStartX = 0; // Store the initial touch position X
+let touchStartY = 0; // Store the initial touch position Y
 
 // Start game on Play button click
 startButton.addEventListener('click', () => {
@@ -35,8 +37,7 @@ function startGame() {
     spaceship.style.left = `${spaceshipX}px`;
     spaceship.style.top = `${spaceshipY}px`;
 
-    // Add keyboard and touch controls
-    document.addEventListener('keydown', handleKeydown); // Keyboard controls
+    // Add touch controls
     gameArea.addEventListener('touchstart', handleTouchStart); // Touch controls
     gameArea.addEventListener('touchmove', handleTouchMove); // Drag for movement
     gameArea.addEventListener('touchend', handleTouchEnd); // Touch release fires a laser
@@ -45,26 +46,15 @@ function startGame() {
     setInterval(() => shootLaser(), fireRate); // Automatically shoot lasers at the set fire rate
 }
 
-// Handle keyboard movement
-function handleKeydown(event) {
-    const step = 20; // Movement step size
-    if (event.key === 'ArrowLeft' && spaceshipX > 0) spaceshipX -= step; // Move left
-    else if (event.key === 'ArrowRight' && spaceshipX < window.innerWidth - spaceship.offsetWidth) spaceshipX += step; // Move right
-    else if (event.key === 'ArrowUp' && spaceshipY > 0) spaceshipY -= step; // Move up
-    else if (event.key === 'ArrowDown' && spaceshipY < window.innerHeight - spaceship.offsetHeight) spaceshipY += step; // Move down
-    if (event.key === ' ') shootLaser(); // Spacebar to shoot
-    spaceship.style.left = `${spaceshipX}px`;
-    spaceship.style.top = `${spaceshipY}px`;
-}
-
-// Handle touch input for spaceship movement
+// Handle touch start (moving spaceship)
 function handleTouchStart(event) {
     isTouching = true; // Start touch
     const touch = event.touches[0];
-    moveSpaceshipTo(touch.clientX, touch.clientY); // Move spaceship to the touch point
+    touchStartX = touch.clientX; // Store initial touch X
+    touchStartY = touch.clientY; // Store initial touch Y
 }
 
-// Handle touch drag for movement
+// Handle touch move (drag for spaceship movement)
 function handleTouchMove(event) {
     event.preventDefault(); // Prevent default scrolling behavior
     if (isTouching) {
@@ -73,7 +63,7 @@ function handleTouchMove(event) {
     }
 }
 
-// Handle touch end to fire laser
+// Handle touch end (fire laser)
 function handleTouchEnd(event) {
     isTouching = false; // Stop touching
     shootLaser(); // Fire the laser once when touch ends

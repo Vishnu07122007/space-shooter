@@ -19,6 +19,8 @@ let fireRate = 300; // Default fire rate
 let scatterLaser = false; // Skill: Scatter Laser
 let shieldActive = false; // Skill: Shield
 
+let isTouching = false; // To track if the user is currently touching
+
 // Start game on Play button click
 startButton.addEventListener('click', () => {
     startScreen.style.display = 'none'; // Hide the start screen
@@ -37,7 +39,7 @@ function startGame() {
     document.addEventListener('keydown', handleKeydown); // Keyboard controls
     gameArea.addEventListener('touchstart', handleTouchStart); // Touch controls
     gameArea.addEventListener('touchmove', handleTouchMove); // Drag for movement
-    gameArea.addEventListener('touchend', shootLaser); // Touch release fires a laser
+    gameArea.addEventListener('touchend', handleTouchEnd); // Touch release fires a laser
 
     setInterval(spawnAsteroid, 2000); // Spawn asteroids periodically every 2 seconds
     setInterval(() => shootLaser(), fireRate); // Automatically shoot lasers at the set fire rate
@@ -50,13 +52,14 @@ function handleKeydown(event) {
     else if (event.key === 'ArrowRight' && spaceshipX < window.innerWidth - spaceship.offsetWidth) spaceshipX += step; // Move right
     else if (event.key === 'ArrowUp' && spaceshipY > 0) spaceshipY -= step; // Move up
     else if (event.key === 'ArrowDown' && spaceshipY < window.innerHeight - spaceship.offsetHeight) spaceshipY += step; // Move down
-   
+    if (event.key === ' ') shootLaser(); // Spacebar to shoot
     spaceship.style.left = `${spaceshipX}px`;
     spaceship.style.top = `${spaceshipY}px`;
 }
 
 // Handle touch input for spaceship movement
 function handleTouchStart(event) {
+    isTouching = true; // Start touch
     const touch = event.touches[0];
     moveSpaceshipTo(touch.clientX, touch.clientY); // Move spaceship to the touch point
 }
@@ -64,8 +67,16 @@ function handleTouchStart(event) {
 // Handle touch drag for movement
 function handleTouchMove(event) {
     event.preventDefault(); // Prevent default scrolling behavior
-    const touch = event.touches[0];
-    moveSpaceshipTo(touch.clientX, touch.clientY); // Update spaceship position to touch point
+    if (isTouching) {
+        const touch = event.touches[0];
+        moveSpaceshipTo(touch.clientX, touch.clientY); // Update spaceship position to touch point
+    }
+}
+
+// Handle touch end to fire laser
+function handleTouchEnd(event) {
+    isTouching = false; // Stop touching
+    shootLaser(); // Fire the laser once when touch ends
 }
 
 // Move the spaceship to a specific position
@@ -76,7 +87,7 @@ function moveSpaceshipTo(x, y) {
     spaceship.style.top = `${spaceshipY}px`;
 }
 
-// Function to shoot lasers
+// Function to shoot lasers (only fires once on touch end)
 function shootLaser() {
     document.getElementById('fire-sound').play();
     const middleLaser = document.createElement('div');

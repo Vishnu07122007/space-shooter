@@ -1,4 +1,4 @@
-// Game elements
+
 let gameArea = document.getElementById('game-area');
 let startScreen = document.getElementById('start-screen');
 let startButton = document.getElementById('start-btn');
@@ -19,10 +19,6 @@ let fireRate = 300; // Default fire rate
 let scatterLaser = false; // Skill: Scatter Laser
 let shieldActive = false; // Skill: Shield
 
-let isTouching = false; // To track if the user is currently touching
-let touchStartX = 0; // Store the initial touch position X
-let touchStartY = 0; // Store the initial touch position Y
-
 // Start game on Play button click
 startButton.addEventListener('click', () => {
     startScreen.style.display = 'none'; // Hide the start screen
@@ -37,49 +33,28 @@ function startGame() {
     spaceship.style.left = `${spaceshipX}px`;
     spaceship.style.top = `${spaceshipY}px`;
 
-    // Add touch controls
-    gameArea.addEventListener('touchstart', handleTouchStart); // Touch controls
-    gameArea.addEventListener('touchmove', handleTouchMove); // Drag for movement
-    gameArea.addEventListener('touchend', handleTouchEnd); // Touch release fires a laser
-
+    document.addEventListener('keydown', handleKeydown); // Add keyboard controls
     setInterval(spawnAsteroid, 2000); // Spawn asteroids periodically every 2 seconds
     setInterval(() => shootLaser(), fireRate); // Automatically shoot lasers at the set fire rate
 }
 
-// Handle touch start (moving spaceship)
-function handleTouchStart(event) {
-    isTouching = true; // Start touch
-    const touch = event.touches[0];
-    touchStartX = touch.clientX; // Store initial touch X
-    touchStartY = touch.clientY; // Store initial touch Y
-}
+// Handle spaceship movement
+function handleKeydown(event) {
+    const step = 20; // Movement step size
+    if (event.key === 'ArrowLeft' && spaceshipX > 0) spaceshipX -= step; // Move left
+    else if (event.key === 'ArrowRight' && spaceshipX < window.innerWidth - spaceship.offsetWidth) spaceshipX += step; // Move right
+    else if (event.key === 'ArrowUp' && spaceshipY > 0) spaceshipY -= step; // Move up
+    else if (event.key === 'ArrowDown' && spaceshipY < window.innerHeight - spaceship.offsetHeight) spaceshipY += step; // Move down
 
-// Handle touch move (drag for spaceship movement)
-function handleTouchMove(event) {
-    event.preventDefault(); // Prevent default scrolling behavior
-    if (isTouching) {
-        const touch = event.touches[0];
-        moveSpaceshipTo(touch.clientX, touch.clientY); // Update spaceship position to touch point
-    }
-}
-
-// Handle touch end (fire laser)
-function handleTouchEnd(event) {
-    isTouching = false; // Stop touching
-    shootLaser(); // Fire the laser once when touch ends
-}
-
-// Move the spaceship to a specific position
-function moveSpaceshipTo(x, y) {
-    spaceshipX = Math.min(Math.max(x - spaceship.offsetWidth / 2, 0), window.innerWidth - spaceship.offsetWidth); // Clamp position within bounds
-    spaceshipY = Math.min(Math.max(y - spaceship.offsetHeight / 2, 0), window.innerHeight - spaceship.offsetHeight);
     spaceship.style.left = `${spaceshipX}px`;
     spaceship.style.top = `${spaceshipY}px`;
 }
 
-// Function to shoot lasers (only fires once on touch end)
+// Function to shoot lasers
 function shootLaser() {
+    
     document.getElementById('fire-sound').play();
+    // Create the middle laser
     const middleLaser = document.createElement('div');
     middleLaser.className = 'laser';
     middleLaser.style.left = `${spaceshipX + spaceship.offsetWidth / 2 - 2.5}px`; // Center the laser
@@ -87,16 +62,20 @@ function shootLaser() {
     gameArea.appendChild(middleLaser);
     lasers.push(middleLaser);
 
-    if (scatterLaser) createScatterLasers(); // Create scatter lasers if active
+    // If scatter laser is active, create left and right lasers
+    if (scatterLaser) {
+        createScatterLasers(); // Function to create scatter lasers
+    }
+
     moveLaser(middleLaser, 0); // Move middle laser
 }
 
-// Create scatter lasers
+// Function to create scatter lasers
 function createScatterLasers() {
     // Left laser
     const leftLaser = document.createElement('div');
     leftLaser.className = 'laser';
-    leftLaser.style.left = `${spaceshipX}px`;
+    leftLaser.style.left = `${spaceshipX}px`; // Slightly left of spaceship
     leftLaser.style.bottom = `${window.innerHeight - spaceshipY - spaceship.offsetHeight + 5}px`;
     gameArea.appendChild(leftLaser);
     lasers.push(leftLaser);
@@ -104,7 +83,7 @@ function createScatterLasers() {
     // Right laser
     const rightLaser = document.createElement('div');
     rightLaser.className = 'laser';
-    rightLaser.style.left = `${spaceshipX + spaceship.offsetWidth - 5}px`;
+    rightLaser.style.left = `${spaceshipX + spaceship.offsetWidth - 5}px`; // Slightly right of spaceship
     rightLaser.style.bottom = `${window.innerHeight - spaceshipY - spaceship.offsetHeight + 5}px`;
     gameArea.appendChild(rightLaser);
     lasers.push(rightLaser);
@@ -113,15 +92,16 @@ function createScatterLasers() {
     moveLaser(rightLaser, 2); // Angle right
 }
 
-// Move lasers
+// Helper function to move lasers
 function moveLaser(laser, angle) {
     let laserInterval = setInterval(() => {
         const laserBottom = parseInt(window.getComputedStyle(laser).bottom);
         const laserLeft = parseInt(window.getComputedStyle(laser).left);
 
         laser.style.bottom = `${laserBottom + 10}px`; // Move laser upwards
-        laser.style.left = `${laserLeft + angle}px`; // Adjust for angled lasers
+        laser.style.left = `${laserLeft + angle}px`; // Adjust horizontal position for angled lasers
 
+        // Remove laser if it goes off-screen
         if (laserBottom > window.innerHeight || laserLeft < 0 || laserLeft > window.innerWidth) {
             clearInterval(laserInterval);
             laser.remove();
@@ -134,7 +114,7 @@ function spawnAsteroid() {
     const asteroid = document.createElement('div');
     asteroid.className = 'asteroid';
     asteroid.style.left = `${Math.random() * (window.innerWidth - 50)}px`;
-    asteroid.style.top = `-50px`;
+    asteroid.style.top = `-50px`; // Start above the screen
     gameArea.appendChild(asteroid);
     asteroids.push(asteroid);
 
@@ -142,6 +122,7 @@ function spawnAsteroid() {
         const asteroidTop = parseInt(window.getComputedStyle(asteroid).top);
         asteroid.style.top = `${asteroidTop + 5}px`;
 
+        // Collision detection with spaceship
         const asteroidRect = asteroid.getBoundingClientRect();
         const spaceshipRect = spaceship.getBoundingClientRect();
 
@@ -158,6 +139,7 @@ function spawnAsteroid() {
             if (spaceshipLifeline <= 0) {
                 spaceship.classList.add('destroyed');
                 setTimeout(() => {
+
                     spaceship.remove();
                     alert(`Game Over! Your Total Score: ${score}`);
                     window.location.reload();
@@ -165,6 +147,7 @@ function spawnAsteroid() {
             }
         }
 
+        // Collision detection with lasers
         lasers.forEach((laser) => {
             const laserRect = laser.getBoundingClientRect();
             if (isCollision(asteroidRect, laserRect)) {
@@ -174,9 +157,15 @@ function spawnAsteroid() {
                 score++;
                 scoreElement.innerText = `Score: ${score}`;
                 clearInterval(asteroidInterval);
+
+                // 1 in 15 chance to spawn a skill
+                if (Math.floor(Math.random() * 10) === 0) {
+                    spawnSkill(asteroid.style.left, asteroid.style.top); // Spawn skill with 1/12 chance
+                }
             }
         });
 
+        // Remove asteroid if it goes off-screen
         if (asteroidTop > window.innerHeight) {
             asteroid.remove();
             clearInterval(asteroidInterval);
@@ -184,7 +173,7 @@ function spawnAsteroid() {
     }, 50);
 }
 
-// Check collision between two elements
+// Check for collision between two elements
 function isCollision(rect1, rect2) {
     return (
         rect1.left < rect2.right &&

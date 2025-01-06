@@ -1,0 +1,140 @@
+* {
+ margin: 0;
+ padding: 0;
+ box-sizing: border-box;
+}
+
+body {
+ background-color: #000;
+ font-family: Arial, sans-serif;
+ background: url('images/bg.jpg') no-repeat center center;
+ background-size: cover;
+}
+
+#start-screen {
+ display: flex;
+ justify-content: center;
+ align-items: center;
+ height: 100vh;
+}
+
+#start-btn {
+ padding: 20px 40px;
+ font-size: 24px;
+ background-color: #00bfff;
+ color: #fff;
+ border: none;
+ cursor: pointer;
+ border-radius: 10px;
+ transition: background-color 0.3s;
+}
+
+#start-btn:hover {
+ background-color: #1e90ff;
+}
+
+#game-area {
+ position: relative;
+ height: 100vh;
+ width: 100vw;
+ overflow: hidden;
+ display: none; /* Hide game area initially */
+}
+
+.spaceship {
+ position: absolute;
+ width: 50px;
+ height: 50px;
+ background: url('images/spaceship.png') no-repeat center center;
+ background-size: cover;
+ bottom: 50px;
+ transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.spaceship.destroyed {
+ transform: scale(0);
+ opacity: 0;
+}
+
+.asteroid {
+ position: absolute;
+ width: 50px;
+ height: 50px;
+ background: url('images/asteroid.png') no-repeat center center;
+ background-size: cover;
+mix-blend-mode:normal;
+}
+
+.laser {
+    width: 3px;
+    height: 15px;
+    background-color: red;  /* Example color */
+    position: absolute;
+    z-index: 10;  /* Ensure lasers appear above other elements */
+}
+
+#score {
+ color: white;
+ position: absolute;
+ top: 10px;
+ font-size: 20px;
+ word-break: keep-all;
+ margin: 1%;
+
+}
+#active-skill {
+ position: absolute;
+ top: 50px; /* Adjust positioning */
+ left: 20px;
+ font-size: 18px;
+ color: #ffffff;
+ z-index: 10;
+}
+
+ #lives {
+ color: white;
+ position: absolute;
+ top: 10px;
+ font-size: 20px;
+margin: 1%;
+margin-top: 3.5%;
+
+}
+
+.skill {
+ position: absolute;
+ width: 30px;
+ height: 30px;
+ background-color: gold;
+ border-radius: 50%;
+ animation: skill-fall 1s infinite linear;
+}
+
+@keyframes skill-fall {
+ from {
+     transform: scale(1);
+ }
+ to {
+     transform: scale(1.2);
+ }
+}
+
+.spaceship.shielded {
+ border: 2px solid cyan; /* Add a glow effect when shield is active */
+ box-shadow: 0 0 10px cyan;
+}
+
+#skills-info {
+ position: absolute;
+ top: 20px;
+ right: 20px;
+ background: rgba(0, 0, 0, 0.5);
+ padding: 10px;
+ border-radius: 5px;
+ color: white;
+ font-family: Arial, sans-serif;
+}
+
+.skill-item {
+ margin-bottom: 5px;
+}
